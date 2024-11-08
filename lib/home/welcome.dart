@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:ocr/pages/image_to_doc.dart';
+import 'package:ocr/testhome/testhome.dart';
 
 class Welcome extends StatefulWidget {
   const Welcome({super.key});
@@ -91,6 +92,6 @@ class _WelcomeState extends State<Welcome> {
 void goto_Chat(BuildContext context) {
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => const ImageToDoc()),
+    MaterialPageRoute(builder: (context) => const Testhome()),
   );
 }
