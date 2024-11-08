@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:ocr/home/home_page.dart';
+import 'package:ocr/testhome/testhome.dart';
 import 'package:ocr/theme/light_mode.dart';
 
 void main() {

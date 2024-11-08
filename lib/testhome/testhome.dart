@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Testhome extends StatefulWidget {
   const Testhome({super.key});
@@ -32,19 +33,47 @@ class _TesthomeState extends State<Testhome> {
                 //   height: height *
                 //       0.09, // for maintening the size of the tezt ##############
                 // ),
-                Text(
-                  "Hello,User",
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.tertiary,
+
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Hello, ",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w300,
+                          fontFamily: GoogleFonts.josefinSans().fontFamily,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "User",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: GoogleFonts.josefinSans().fontFamily,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
+                      ),
+                    ],
                   ),
+                  textAlign: TextAlign.center,
                 ),
+                // Text(
+                //   "Hello,User",
+                //   style: TextStyle(
+                //     fontSize: 30,
+                //     fontWeight: FontWeight.bold,
+                //     fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                //     color: Theme.of(context).colorScheme.tertiary,
+                //   ),
+                // ),
                 Text(
                   "how can i help you roght now?",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 20,
                     fontWeight: FontWeight.w500,
+                    fontFamily: GoogleFonts.josefinSans().fontFamily,
                     color: Theme.of(context).colorScheme.tertiary,
                   ),
                 ),
@@ -98,6 +127,8 @@ class _TesthomeState extends State<Testhome> {
                                     style: TextStyle(
                                       fontSize: 32,
                                       fontWeight: FontWeight.w400,
+                                      fontFamily:
+                                          GoogleFonts.josefinSans().fontFamily,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .tertiary,
@@ -108,6 +139,8 @@ class _TesthomeState extends State<Testhome> {
                                     style: TextStyle(
                                       fontSize: 32,
                                       fontWeight: FontWeight.w400,
+                                      fontFamily:
+                                          GoogleFonts.josefinSans().fontFamily,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .tertiary,
@@ -118,6 +151,8 @@ class _TesthomeState extends State<Testhome> {
                                     style: TextStyle(
                                       fontSize: 32,
                                       fontWeight: FontWeight.bold,
+                                      fontFamily:
+                                          GoogleFonts.josefinSans().fontFamily,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .tertiary,
@@ -169,6 +204,8 @@ class _TesthomeState extends State<Testhome> {
                                     style: TextStyle(
                                       fontSize: 23,
                                       fontWeight: FontWeight.bold,
+                                      fontFamily:
+                                          GoogleFonts.josefinSans().fontFamily,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .tertiary,
@@ -214,8 +251,10 @@ class _TesthomeState extends State<Testhome> {
                               Center(
                                 child: Text("Convert your Files",
                                     style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily:
+                                          GoogleFonts.josefinSans().fontFamily,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .tertiary,
@@ -226,6 +265,29 @@ class _TesthomeState extends State<Testhome> {
                         ),
                       ],
                     )
+                  ],
+                ),
+                SizedBox(
+                  height: height * 0.04,
+                ),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Our Feature",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: GoogleFonts.josefinSans().fontFamily,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        )),
+                    Text("View all",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: GoogleFonts.josefinSans().fontFamily,
+                          color: Theme.of(context).colorScheme.tertiary,
+                        )),
                   ],
                 )
               ],
