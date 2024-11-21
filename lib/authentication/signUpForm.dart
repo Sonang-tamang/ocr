@@ -1,11 +1,139 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_constructors
 
+import 'dart:convert';
+import 'dart:io';
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:ocr/authentication/authentication.dart';
-import 'package:ocr/home/welcome.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class Signupform extends StatelessWidget {
+class Signupform extends StatefulWidget {
   const Signupform({super.key});
+
+  @override
+  State<Signupform> createState() => _Signupform2State();
+}
+
+class _Signupform2State extends State<Signupform> {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController contactController = TextEditingController();
+  File? _selectedImage;
+//image picker
+
+  Future<void> _pickImage() async {
+    final returnedImage =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (returnedImage != null) {
+      // Image was picked successfully, proceed with setting the image
+      setState(() {
+        _selectedImage = File(returnedImage.path);
+      });
+    } else {
+      // No image was selected, handle the case as needed
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No image selected")),
+      );
+    }
+  }
+
+  // Function to handle user registration
+  Future<void> registerUser() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match!")),
+      );
+      return;
+    }
+
+    // Prepare form data
+    Map<String, String> formData = {
+      "username": usernameController.text,
+      "email": emailController.text,
+      "password": passwordController.text,
+      "first_name": firstNameController.text,
+      "last_name": lastNameController.text,
+      "contact": contactController.text,
+    };
+
+    // Create multipart request
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse("https://ocr.goodwish.com.np/api/users/"),
+    );
+
+    // Add form fields to request
+    formData.forEach((key, value) {
+      request.fields[key] = value;
+    });
+
+    // Add the profile picture if selected
+    if (_selectedImage != null) {
+      var file = await http.MultipartFile.fromPath(
+        'photo',
+        _selectedImage!.path,
+        contentType: MediaType('image', 'jpeg'),
+      );
+      request.files.add(file);
+    }
+
+    // Send the request
+    try {
+      var response = await request.send();
+      var responseData = await response.stream.bytesToString();
+
+      // Log the raw response
+      print("Response Data: $responseData");
+
+      // Check if the response is in HTML (i.e., error page)
+      if (response.headers['content-type']?.contains('text/html') == true) {
+        // Handle HTML error page
+        print("HTML Response: $responseData");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("HTML Error: Please check your request or server.")),
+        );
+      } else {
+        // Attempt to parse JSON response
+        try {
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            var responseJson = json.decode(responseData);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Registration Successful!")),
+            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Authentication()),
+            );
+          } else {
+            var responseJson = json.decode(responseData);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error: ${responseJson['message']}")),
+            );
+          }
+        } catch (e) {
+          print("Error decoding JSON: $e");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error: Unable to parse server response.")),
+          );
+        }
+      }
+    } catch (e) {
+      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("An error occurred: $e")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,17 +193,29 @@ class Signupform extends StatelessWidget {
                           width: width,
                           height: height * 0.09,
                           decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.transparent.withOpacity(0.5)),
-                          child: Icon(
-                            Icons.person,
-                            size: height * 0.07,
-                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            color: Colors.transparent.withOpacity(0.5),
+                            image: _selectedImage != null
+                                ? DecorationImage(
+                                    image: FileImage(_selectedImage!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: InkWell(
+                            onTap:
+                                _pickImage, // Call the image picker function on tap
+                            child: _selectedImage == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: height * 0.07,
+                                    color: Colors.white,
+                                  )
+                                : null, // No icon if the user has selected an image
                           ),
                         ),
-                        SizedBox(
-                          height: height * 0.01,
-                        ),
+
+                        // _selectedImage! = null ? Image.file(_selectedImage!): Text("hello")
 
                         Text(
                           "Upload you profile picture",
@@ -95,6 +235,7 @@ class Signupform extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
+                            controller: usernameController,
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -115,6 +256,7 @@ class Signupform extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
+                            controller: emailController,
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -135,6 +277,7 @@ class Signupform extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
+                            controller: passwordController,
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -155,6 +298,7 @@ class Signupform extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
+                            controller: confirmPasswordController,
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -175,6 +319,7 @@ class Signupform extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
+                            controller: firstNameController,
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -195,6 +340,7 @@ class Signupform extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
+                            controller: lastNameController,
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -215,6 +361,7 @@ class Signupform extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
+                            controller: contactController,
                             decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -240,15 +387,18 @@ class Signupform extends StatelessWidget {
                         SizedBox(
                           height: height * 0.05,
                           width: width * 0.6,
-                          child: Card(
-                            color: const Color.fromARGB(255, 55, 135, 200),
-                            child: Center(
-                              child: Text(
-                                "Sign Up",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                          child: InkWell(
+                            onTap: registerUser,
+                            child: Card(
+                              color: const Color.fromARGB(255, 55, 135, 200),
+                              child: Center(
+                                child: Text(
+                                  "Sign Up",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ),
@@ -257,9 +407,7 @@ class Signupform extends StatelessWidget {
                         // signup text ########################################################
 
                         TextButton(
-                            onPressed: () {
-                              goto_Login(context);
-                            },
+                            onPressed: () {},
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.red,
                             ),
@@ -286,7 +434,7 @@ class Signupform extends StatelessWidget {
                                   "Continue with Google ",
                                   style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 15,
+                                      fontSize: height * 0.018,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Icon(
@@ -309,11 +457,4 @@ class Signupform extends StatelessWidget {
       ),
     );
   }
-}
-
-void goto_Login(BuildContext context) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const Authentication()),
-  );
 }

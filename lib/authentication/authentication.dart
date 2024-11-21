@@ -148,7 +148,7 @@ class _AuthenticationState extends State<Authentication> {
                               "Continue with Google ",
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 15,
+                                  fontSize: height * 0.015,
                                   fontWeight: FontWeight.bold),
                             ),
                             Icon(
