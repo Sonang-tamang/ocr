@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:ocr/authentication/authentication.dart';
 import 'package:ocr/home/home_page.dart';
 import 'package:ocr/testhome/testhome.dart';
 import 'package:ocr/theme/light_mode.dart';
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'RAN',
-      home: HomePage(),
+      home: Authentication(),
       theme: lightMode,
     );
   }
