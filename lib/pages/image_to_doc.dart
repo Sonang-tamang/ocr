@@ -28,7 +28,7 @@ class _ImageToDocState extends State<ImageToDoc> {
   bool isfilepicked = false;
   bool _isLoading = false;
   String? _convertedFileUrl;
-  String? _errorMessage;
+  String? _errorMessage; // not being used#######
   final String _token = '84226ca0b3a35babba70122c7a4baec327400c38'; //token
   String permissionStatus = "Permission not checked yet.";
 
@@ -46,6 +46,8 @@ class _ImageToDocState extends State<ImageToDoc> {
       setState(() {
         _selectedImage = File(returnedImage.path);
         isfilepicked = true;
+        _convertedFileUrl =
+            null; // to remove that download button tem###############
       });
     } else {
       // No image was selected, handle the case as needed
@@ -293,7 +295,7 @@ class _ImageToDocState extends State<ImageToDoc> {
                                   borderRadius: BorderRadius.circular(8)),
                               child: Center(
                                   child: Text(
-                                "CONVERT TO IMAGES",
+                                "CONVERT TO DOCX",
                                 style: TextStyle(color: Colors.white),
                               )),
                             ),
@@ -313,7 +315,7 @@ class _ImageToDocState extends State<ImageToDoc> {
                                 child: InkWell(
                                   onTap: () {
                                     downloadFile("$_convertedFileUrl",
-                                        "Converted images_${DateTime.now().microsecondsSinceEpoch}.docx");
+                                        "${path.basename(_selectedImage!.path)}${DateTime.now().microsecondsSinceEpoch}.docx"); // cahnage in  name of file
 
                                     print("Document URL: $_convertedFileUrl");
                                     ScaffoldMessenger.of(context).showSnackBar(

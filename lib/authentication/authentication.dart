@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http; // For making HTTP requests
 import 'package:ocr/authentication/signUpForm.dart';
 import 'package:ocr/home/welcome.dart';
 import 'package:ocr/pages/image_to_doc.dart';
+import 'package:ocr/pages/pdf_to_doc.dart';
 
 class Authentication extends StatefulWidget {
   const Authentication({super.key});
@@ -65,7 +66,7 @@ class _AuthenticationState extends State<Authentication> {
           // Navigate to the Welcome screen
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ImageToDoc()),
+            MaterialPageRoute(builder: (context) => PdfToDoc()),
           );
         } else {
           // Handle unexpected response without token
