@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:ocr/authentication/authentication.dart';
 import 'package:ocr/home/home_page.dart';
+import 'package:ocr/pages/image_to_doc.dart';
 import 'package:ocr/testhome/testhome.dart';
 import 'package:ocr/theme/light_mode.dart';
 
