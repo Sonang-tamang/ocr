@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ocr/authentication/authentication.dart';
 import 'package:ocr/home/home_page.dart';
 import 'package:ocr/pages/image_to_doc.dart';
+import 'package:ocr/pages/image_to_text.dart';
 import 'package:ocr/pages/pdf_to_doc.dart';
 import 'package:ocr/pages/pdf_to_image.dart';
 import 'package:ocr/testhome/testhome.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'RAN',
-      home: PdfToImage(),
+      home: ImageToText(),
       theme: lightMode,
     );
   }
