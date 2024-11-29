@@ -7,6 +7,7 @@ import 'package:ocr/pages/image_to_doc.dart';
 import 'package:ocr/pages/image_to_text.dart';
 import 'package:ocr/pages/pdf_to_doc.dart';
 import 'package:ocr/pages/pdf_to_image.dart';
+import 'package:ocr/pages/table_Extraction.dart';
 import 'package:ocr/testhome/testhome.dart';
 import 'package:ocr/theme/light_mode.dart';
 
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'RAN',
-      home: ImageToText(),
+      home: TableExtension(),
       theme: lightMode,
     );
   }
