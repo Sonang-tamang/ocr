@@ -7,8 +7,11 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hive/hive.dart';
+import 'package:ocr/authentication/login_data.dart';
 
 class TableExtension extends StatefulWidget {
+  const TableExtension({super.key});
   @override
   _TableExtensionState createState() => _TableExtensionState();
 }
@@ -20,8 +23,12 @@ class _TableExtensionState extends State<TableExtension> {
   String? error;
   bool isDialogOpen = false;
 
-  String? token =
-      "84226ca0b3a35babba70122c7a4baec327400c38"; // Replace with token from storage
+  // Retrieve the token dynamically
+  Future<String?> getToken() async {
+    final box = Hive.box<LoginData>('loginDataBOX');
+    final loginData = box.get('currentUser');
+    return loginData?.token;
+  }
 
   void handleFileChange() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -33,13 +40,22 @@ class _TableExtensionState extends State<TableExtension> {
       setState(() {
         selectedFile = File(result.files.single.path!);
         error = null;
+        tableData = [];
       });
     }
   }
 
 // for converting tabele ############################################################################
   Future<void> handleExtractTable() async {
-    if (token == null || token!.isEmpty) {
+    final token = await getToken();
+    if (token == null) {
+      setState(() {
+        error = "Authentication failed: No token found.";
+      });
+      return;
+    }
+
+    if (token.isEmpty) {
       setState(() {
         isDialogOpen = true;
       });
@@ -281,28 +297,28 @@ class _TableExtensionState extends State<TableExtension> {
                   icon: Icon(Icons.download),
                   label: Text("Download Excel"),
                 ),
-                ElevatedButton(
-                    onPressed: () {
-                      print("$tableData");
-                    },
-                    child: Text(" data ")),
-                if (isDialogOpen)
-                  AlertDialog(
-                    title: Text("Login Required"),
-                    content: Text(
-                        "You need to be logged in to access this feature."),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pushNamed(context, "/auth"),
-                        child: Text("Login"),
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            print("$tableData");
-                          },
-                          child: Text(" data "))
-                    ],
-                  ),
+                // ElevatedButton(
+                //     onPressed: () {
+                //       print("$tableData");
+                //     },
+                //     child: Text(" data ")),
+                // if (isDialogOpen)
+                //   AlertDialog(
+                //     title: Text("Login Required"),
+                // content: Text(
+                //     "You need to be logged in to access this feature."),
+                // actions: [
+                // TextButton(
+                //   onPressed: () => Navigator.pushNamed(context, "/auth"),
+                //   child: Text("Login"),
+                // ),
+                // ElevatedButton(
+                //     onPressed: () {
+                //       print("$tableData");
+                //     },
+                //     child: Text(" data "))
+                // ],
+                // ),
               ],
             ),
           ),

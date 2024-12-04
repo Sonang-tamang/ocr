@@ -2,9 +2,12 @@
 
 import 'dart:convert'; // For JSON encoding and decoding
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 import 'package:http/http.dart' as http; // For making HTTP requests
+import 'package:ocr/authentication/login_data.dart';
 import 'package:ocr/authentication/signUpForm.dart';
+import 'package:ocr/home/home_page.dart';
 import 'package:ocr/home/welcome.dart';
 import 'package:ocr/pages/image_to_doc.dart';
 import 'package:ocr/pages/pdf_to_doc.dart';
@@ -32,7 +35,7 @@ class _AuthenticationState extends State<Authentication> {
   //   final crendetial = GoogleAU.credetial(gAuth)
   // }
 
-  // Function to handle login
+  // Function to handle nornal login ###############################################################
   Future<void> loginUser() async {
     final String apiUrl = "https://ocr.goodwish.com.np/api/login/";
     final String username = usernameController.text.trim();
@@ -58,6 +61,22 @@ class _AuthenticationState extends State<Authentication> {
         final responseData = jsonDecode(response.body);
 
         if (responseData.containsKey("token")) {
+          // saving return data to hive locally######################################
+
+          final box = Hive.box<LoginData>('loginDataBOX');
+          final loginData = LoginData(
+            id: responseData['id'],
+            username: responseData['username'],
+            email: responseData['email'],
+            firstName: responseData['first_name'],
+            lastName: responseData['last_name'],
+            photo: responseData['photo'],
+            contact: responseData['contact'],
+            token: responseData['token'],
+          );
+
+          box.put('currentUser', loginData);
+
           // Login successful
           print("Login successful: $responseData");
           _showMessage(
@@ -66,7 +85,7 @@ class _AuthenticationState extends State<Authentication> {
           // Navigate to the Welcome screen
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => PdfToDoc()),
+            MaterialPageRoute(builder: (context) => HomePage()),
           );
         } else {
           // Handle unexpected response without token

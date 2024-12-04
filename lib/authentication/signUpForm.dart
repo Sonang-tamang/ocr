@@ -198,7 +198,7 @@ class _Signupform2State extends State<Signupform> {
                             image: _selectedImage != null
                                 ? DecorationImage(
                                     image: FileImage(_selectedImage!),
-                                    fit: BoxFit.cover,
+                                    fit: BoxFit.fill,
                                   )
                                 : null,
                           ),

@@ -7,6 +7,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:hive/hive.dart';
+import 'package:ocr/authentication/login_data.dart';
 import 'package:ocr/home/welcome.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -29,10 +31,17 @@ class _ImageToDocState extends State<ImageToDoc> {
   bool _isLoading = false;
   String? _convertedFileUrl;
   String? _errorMessage; // not being used#######
-  final String _token = '84226ca0b3a35babba70122c7a4baec327400c38'; //token
+  // final String _token = '84226ca0b3a35babba70122c7a4baec327400c38'; //token
   String permissionStatus = "Permission not checked yet.";
 
   String _status = "Ready to download";
+
+  // Retrieve the token dynamically
+  Future<String?> getToken() async {
+    final box = Hive.box<LoginData>('loginDataBOX');
+    final loginData = box.get('currentUser');
+    return loginData?.token;
+  }
 
 // to pick image
 
@@ -72,10 +81,18 @@ class _ImageToDocState extends State<ImageToDoc> {
       _convertedFileUrl = null;
     });
 
+    final token = await getToken();
+    if (token == null) {
+      setState(() {
+        // _error = "Authentication failed: No token found.";
+      });
+      return;
+    }
+
     try {
       final Uri url = Uri.parse('https://ocr.goodwish.com.np/api/convert-doc/');
       final request = http.MultipartRequest('POST', url)
-        ..headers['Authorization'] = 'Token $_token'
+        ..headers['Authorization'] = 'Token $token'
         ..files.add(
             await http.MultipartFile.fromPath('image', _selectedImage!.path));
       final response = await request.send();

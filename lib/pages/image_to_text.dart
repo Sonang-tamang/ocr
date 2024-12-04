@@ -5,8 +5,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:ocr/authentication/login_data.dart';
 import 'package:path/path.dart' as path;
 
 class ImageToText extends StatefulWidget {
@@ -27,6 +29,13 @@ class _ImageToTextState extends State<ImageToText> {
   bool _isTextExtracted = false;
   String? _errorMessage;
   List<String>? _extractedTextLines;
+
+  // Retrieve the token dynamically
+  Future<String?> getToken() async {
+    final box = Hive.box<LoginData>('loginDataBOX');
+    final loginData = box.get('currentUser');
+    return loginData?.token;
+  }
 
   /// Picks an image from the gallery
   Future<void> _pickImage() async {
@@ -61,6 +70,14 @@ class _ImageToTextState extends State<ImageToText> {
       _errorMessage = null;
       _extractedTextLines = null;
     });
+
+    final token = await getToken();
+    if (token == null) {
+      setState(() {
+        _errorMessage = "Authentication failed: No token found.";
+      });
+      return;
+    }
 
     try {
       final request = http.MultipartRequest(

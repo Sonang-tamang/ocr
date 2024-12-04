@@ -64,9 +64,7 @@ class _WelcomeState extends State<Welcome> {
             ),
             SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {
-                goto_Chat(context);
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 shape: RoundedRectangleBorder(

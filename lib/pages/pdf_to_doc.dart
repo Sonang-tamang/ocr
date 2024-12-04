@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:ocr/authentication/login_data.dart';
 import 'package:path/path.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
@@ -30,8 +32,18 @@ class _PdfToDocState extends State<PdfToDoc> {
 
   // API########################
   final String apiUrl = 'https://ocr.goodwish.com.np/api/pdf-to-docx/';
-  final String token =
-      'e523b1bdc7f498148990d8c4cd9119a814c8daa0'; // my token in fluter ###############
+
+  // data from local storges #############################
+
+  // Retrieve the token dynamically
+  Future<String?> getToken() async {
+    final box = Hive.box<LoginData>('loginDataBOX');
+    final loginData = box.get('currentUser');
+    return loginData?.token;
+  }
+
+  // final String token =
+  //     'e523b1bdc7f498148990d8c4cd9119a814c8daa0'; // my token in fluter ###############
 
   // Method to pick files ##############################################
 
@@ -58,6 +70,14 @@ class _PdfToDocState extends State<PdfToDoc> {
     if (_pdfFile == null) {
       setState(() {
         _error = "Please upload a PDF file to convert.";
+      });
+      return;
+    }
+
+    final token = await getToken();
+    if (token == null) {
+      setState(() {
+        _error = "Authentication failed: No token found.";
       });
       return;
     }
@@ -349,3 +369,248 @@ class _PdfToDocState extends State<PdfToDoc> {
     );
   }
 }
+
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:flutter_spinkit/flutter_spinkit.dart';
+// import 'package:hive/hive.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:path/path.dart' as path;
+// import 'package:permission_handler/permission_handler.dart';
+// import 'dart:convert';
+
+// import 'package:ocr/authentication/login_data.dart';
+
+// class PdfToDoc extends StatefulWidget {
+//   const PdfToDoc({super.key});
+
+//   @override
+//   State<PdfToDoc> createState() => _PdfToDocState();
+// }
+
+// class _PdfToDocState extends State<PdfToDoc> {
+//   File? _pdfFile;
+//   String? _convertedFileUrl;
+//   bool _isLoading = false;
+//   String? _error;
+//   bool isFilePicked = false;
+//   String _status = "Ready to download";
+
+//   final String apiUrl = 'https://ocr.goodwish.com.np/api/pdf-to-docx/';
+
+//   // Retrieve the token dynamically from local storage
+//   Future<String?> getToken() async {
+//     final box = Hive.box<LoginData>('loginDataBOX');
+//     final loginData = box.get('currentUser');
+//     return loginData?.token;
+//   }
+
+//   // Method to pick PDF files
+//   Future<void> pickFiles() async {
+//     var result = await FilePicker.platform.pickFiles(
+//       allowMultiple: false,
+//       type: FileType.custom,
+//       allowedExtensions: ['pdf'],
+//     );
+
+//     if (result != null) {
+//       setState(() {
+//         _pdfFile = File(result.files.single.path!);
+//         isFilePicked = true;
+//         _convertedFileUrl = null;
+//         _error = null;
+//       });
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//             content: Text("File selected: ${path.basename(_pdfFile!.path)}")),
+//       );
+//     }
+//   }
+
+//   // Convert the file to DOCX
+//   Future<void> _convertFile() async {
+//     if (_pdfFile == null) {
+//       setState(() {
+//         _error = "Please upload a PDF file to convert.";
+//       });
+//       return;
+//     }
+
+//     final token = await getToken();
+//     if (token == null) {
+//       setState(() {
+//         _error = "Authentication failed: No token found.";
+//       });
+//       return;
+//     }
+
+//     setState(() {
+//       _isLoading = true;
+//       _convertedFileUrl = null;
+//       _error = null;
+//     });
+
+//     try {
+//       var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
+//         ..headers['Authorization'] = 'Token $token'
+//         ..files.add(await http.MultipartFile.fromPath('file', _pdfFile!.path));
+
+//       var response = await request.send();
+
+//       if (response.statusCode == 200) {
+//         var responseBody = await response.stream.bytesToString();
+//         final Map<String, dynamic> responseData = jsonDecode(responseBody);
+
+//         if (responseData['document'] != null) {
+//           final String baseUrl = 'https://ocr.goodwish.com.np';
+//           final String fullDocumentUrl = '$baseUrl${responseData['document']}';
+
+//           setState(() {
+//             _convertedFileUrl = fullDocumentUrl;
+//           });
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(
+//                 content: Text("Conversion successful! Ready to download.")),
+//           );
+//         } else {
+//           setState(() {
+//             _error = "Document conversion failed or returned empty.";
+//           });
+//         }
+//       } else {
+//         setState(() {
+//           _error = "Failed to convert the file. Status: ${response.statusCode}";
+//         });
+//       }
+//     } catch (e) {
+//       setState(() {
+//         _error = "Error: $e";
+//       });
+//     } finally {
+//       setState(() {
+//         _isLoading = false;
+//       });
+//     }
+//   }
+
+//   // Method to download the converted file
+//   Future<void> downloadFile(String url, String fileName) async {
+//     setState(() {
+//       _isLoading = true;
+//       _status = "Downloading...";
+//     });
+
+//     try {
+//       if (!await _requestStoragePermission()) {
+//         setState(() => _status = "Storage permission denied.");
+//         return;
+//       }
+
+//       final response = await http.get(Uri.parse(url));
+//       if (response.statusCode != 200) {
+//         setState(() => _status = "Failed to download: ${response.statusCode}");
+//         return;
+//       }
+
+//       final filePath = "/storage/emulated/0/Download/$fileName";
+//       await File(filePath).writeAsBytes(response.bodyBytes);
+//       setState(() => _status = "File saved to: $filePath");
+//     } catch (e) {
+//       setState(() => _status = "Error: $e");
+//     } finally {
+//       setState(() => _isLoading = false);
+//     }
+//   }
+
+//   Future<bool> _requestStoragePermission() async {
+//     if (await Permission.storage.isGranted ||
+//         await Permission.manageExternalStorage.isGranted) {
+//       return true;
+//     }
+
+//     if (await Permission.storage.request().isGranted ||
+//         await Permission.manageExternalStorage.request().isGranted) {
+//       return true;
+//     }
+
+//     if (await Permission.storage.isPermanentlyDenied) {
+//       await openAppSettings();
+//     }
+//     return false;
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     double width = MediaQuery.of(context).size.width;
+//     double height = MediaQuery.of(context).size.height;
+
+//     return Scaffold(
+//       body: Center(
+//         child: Card(
+//           elevation: 20,
+//           child: Padding(
+//             padding: const EdgeInsets.all(16.0),
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 Text(
+//                   "PDF to Document Converter",
+//                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//                 ),
+//                 SizedBox(height: 20),
+//                 InkWell(
+//                   onTap: pickFiles,
+//                   child: Container(
+//                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+//                     decoration: BoxDecoration(
+//                       border: Border.all(color: Colors.blue, width: 1.5),
+//                       borderRadius: BorderRadius.circular(6.0),
+//                     ),
+//                     child: Row(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         Icon(Icons.file_open_outlined, color: Colors.blue),
+//                         SizedBox(width: 8),
+//                         Text("UPLOAD PDF",
+//                             style: TextStyle(color: Colors.blue)),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//                 if (isFilePicked)
+//                   Padding(
+//                     padding: const EdgeInsets.only(top: 10),
+//                     child:
+//                         Text("Selected file: ${path.basename(_pdfFile!.path)}"),
+//                   ),
+//                 if (_error != null)
+//                   Text(
+//                     _error!,
+//                     style: TextStyle(color: Colors.red),
+//                   ),
+//                 SizedBox(height: 20),
+//                 _isLoading
+//                     ? SpinKitThreeBounce(color: Colors.blue, size: 40)
+//                     : ElevatedButton(
+//                         onPressed: _convertFile,
+//                         child: Text("CONVERT TO DOCX"),
+//                       ),
+//                 if (_convertedFileUrl != null)
+//                   ElevatedButton(
+//                     onPressed: () {
+//                       downloadFile(
+//                         _convertedFileUrl!,
+//                         "${path.basename(_pdfFile!.path)}_${DateTime.now().millisecondsSinceEpoch}.docx",
+//                       );
+//                     },
+//                     child: Text("DOWNLOAD FILE"),
+//                   ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

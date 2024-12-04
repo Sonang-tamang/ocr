@@ -7,10 +7,12 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import 'package:http_parser/http_parser.dart';
+import 'package:ocr/authentication/login_data.dart';
 import 'package:path/path.dart' as path;
 import 'dart:convert';
 
@@ -34,8 +36,15 @@ class _PdfToImageState extends State<PdfToImage> {
 
   // API########################
   final String apiUrl = 'https://ocr.goodwish.com.np/api/files/';
-  final String token =
-      'e523b1bdc7f498148990d8c4cd9119a814c8daa0'; // my token in fluter ###############
+
+  // Retrieve the token dynamically
+  Future<String?> getToken() async {
+    final box = Hive.box<LoginData>('loginDataBOX');
+    final loginData = box.get('currentUser');
+    return loginData?.token;
+  }
+  // final String token =
+  //     'e523b1bdc7f498148990d8c4cd9119a814c8daa0'; // my token in fluter ###############
 
   //pick the pdf################################################3
 
@@ -53,6 +62,7 @@ class _PdfToImageState extends State<PdfToImage> {
         isfilepicked = true;
         _convertedFileUrl = null;
         _error = null;
+        convertedImages = [];
       });
     }
   }
@@ -62,6 +72,14 @@ class _PdfToImageState extends State<PdfToImage> {
     if (_pdfFile == null) {
       setState(() {
         _error = "Please upload a PDF file to convert.";
+      });
+      return;
+    }
+
+    final token = await getToken();
+    if (token == null) {
+      setState(() {
+        _error = "Authentication failed: No token found.";
       });
       return;
     }
@@ -310,7 +328,7 @@ class _PdfToImageState extends State<PdfToImage> {
 
                         //to do look into this ############################# hello #######33
                         //download button fo the loac storges ###########################################################################3
-                        if (convertedImages != null)
+                        if (convertedImages.isNotEmpty)
                           Column(
                             children: [
                               SizedBox(
